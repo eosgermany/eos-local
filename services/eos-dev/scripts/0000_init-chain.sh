@@ -9,7 +9,7 @@ cleos="cleos -u http://eosiodev:8888"
 
 # Creates an eos account with 10.0000 EOS
 function create_eos_account () {
-  $cleos create account eoslocal $1 $2 $2
+  $cleos system newaccount --stake-net '1 EOS' --stake-cpu '1 EOS' --buy-ram '1 EOS' eoslocal $1 $2 $2
   $cleos push action eosio.token issue '[ "'$1'", "10.0000 EOS", "initial stake" ]' -p eosio
 }
 
@@ -20,6 +20,7 @@ function unlock_wallet () {
   sleep .5
 }
 
+# Create the default wallet and stores the password on a file
 function create_wallet () {
   echo "Creating wallet"
   WALLET_PASSWORD=$($cleos wallet create --to-console | awk 'FNR > 3 { print $1 }' | tr -d '"')
@@ -27,6 +28,7 @@ function create_wallet () {
   sleep .5
 }
 
+# Helper funciton to import private key into the default wallet
 function import_private_key () {
   $cleos wallet import --private-key $1
 }
@@ -58,11 +60,15 @@ function initialize () {
   sleep .5
 
   echo "Creates eoslocal account with stake..."
-  $cleos create account eosio eoslocal $EOSLOCAL_OWNER_PUBKEY $EOSLOCAL_ACTIVE_PUBKEY
+  $cleos system newaccount --stake-net '10 EOS' --stake-cpu '10 EOS' --buy-ram '10 EOS' eosio eoslocal $EOSLOCAL_OWNER_PUBKEY $EOSLOCAL_ACTIVE_PUBKEY
   $cleos push action eosio.token issue '[ "'eoslocal'", "1000.0000 EOS", "initial stake" ]' -p eosio
   sleep .5
+
+  echo "Deploy eosio.system"
+  $cleos set contract eosio /contracts/eosio.system -p eosio
 }
 
+# Create testing user accounts, use these key configure scatter, lynx and other wallets
 function create_testing_accounts () {
 
   echo "Creating testing accounts"
