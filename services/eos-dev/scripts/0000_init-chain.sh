@@ -59,13 +59,13 @@ function initialize () {
   $cleos push action eosio.token create '[ "eosio", "1000000000.0000 EOS", 0, 0, 0]' -p eosio.token
   sleep .5
 
+  echo "Deploy eosio.system"
+  $cleos set contract eosio /contracts/eosio.system -p eosio
+
   echo "Creates eoslocal account with stake..."
   $cleos system newaccount --stake-net '10 EOS' --stake-cpu '10 EOS' --buy-ram '10 EOS' eosio eoslocal $EOSLOCAL_OWNER_PUBKEY $EOSLOCAL_ACTIVE_PUBKEY
   $cleos push action eosio.token issue '[ "'eoslocal'", "1000.0000 EOS", "initial stake" ]' -p eosio
   sleep .5
-
-  echo "Deploy eosio.system"
-  $cleos set contract eosio /contracts/eosio.system -p eosio
 }
 
 # Create testing user accounts, use these key configure scatter, lynx and other wallets
