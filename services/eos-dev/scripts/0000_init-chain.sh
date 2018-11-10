@@ -9,7 +9,7 @@ cleos="cleos -u http://eosiodev:8888"
 
 # Creates an eos account with 10.0000 EOS
 function create_eos_account () {
-  $cleos system newaccount --stake-net '1 EOS' --stake-cpu '1 EOS' --buy-ram '1 EOS' eoslocal $1 $2 $2
+  $cleos system newaccount eoslocal --transfer $1 $2 $2 --stake-net '1 EOS' --stake-cpu '1 EOS' --buy-ram '1 EOS' # --buy-ram-kbytes 8192
   $cleos push action eosio.token issue '[ "'$1'", "10.0000 EOS", "initial stake" ]' -p eosio
 }
 
@@ -101,12 +101,13 @@ function deploy_system_contracts () {
 
   echo "Deploy eosio.system"
   $cleos set contract eosio /contracts/eosio.system
+
+  echo "Make eosio.msig privileged"
+  $cleos push action eosio setpriv '["eosio.msig", 1]' -p eosio@active
 }
 
-# initialize chain
-function initialize () {
-
-  # eoslocal
+# Create eoslocal priveledged account
+function create_eoslocal_account () {
   EOSLOCAL_OWNER_PVTKEY="5KacG2v3XYrjmxazgriHVo1updD7PKXJMWzcaQmBMMXE9Y69aW9"
   EOSLOCAL_OWNER_PUBKEY="EOS88bvtAMTwPBQyF8cxFUFXez9zCoebABS3dXngdNphqNtiszLQh"
 
@@ -117,17 +118,14 @@ function initialize () {
   import_private_key $EOSLOCAL_OWNER_PVTKEY
   import_private_key $EOSLOCAL_ACTIVE_PVTKEY
 
-
-
   echo "Creates eoslocal account with stake..."
-  $cleos system newaccount --stake-net '10 EOS' --stake-cpu '10 EOS' --buy-ram '10 EOS' eosio eoslocal $EOSLOCAL_OWNER_PUBKEY $EOSLOCAL_ACTIVE_PUBKEY
+  $cleos system newaccount eosio --transfer eoslocal $EOSLOCAL_OWNER_PUBKEY $EOSLOCAL_ACTIVE_PUBKEY --stake-net '1 EOS' --stake-cpu '1 EOS' --buy-ram '1 EOS' # --buy-ram-kbytes 8192
   $cleos push action eosio.token issue '[ "'eoslocal'", "1000.0000 EOS", "initial stake" ]' -p eosio
   sleep .5
 }
 
 # Create testing user accounts, use these key configure scatter, lynx and other wallets
 function create_testing_accounts () {
-
   echo "Creating testing accounts"
 
   USER_A_ACCOUNT="eoslocalusra"
@@ -186,7 +184,9 @@ do
 done
 
 create_wallet
-initialize
+create_eosio_accounts
+deploy_system_contracts
+create_eoslocal_account
 create_testing_accounts
 build_and_deploy_contracts
 
