@@ -35,7 +35,7 @@ function import_private_key () {
 
 # Helper funciton to create system accounts
 function create_system_account () {
-  $cleos create account eosio $1 $2
+  $cleos create account eosio $1 $2 -p eosio
 }
 
 # Creates eosio system accounts
@@ -103,7 +103,7 @@ function deploy_system_contracts () {
   $cleos set contract eosio /contracts/eosio.system
 
   echo "Make eosio.msig privileged"
-  $cleos push action eosio setpriv '["eosio.msig", 1]' -p eosio@active
+  $cleos push action eosio setpriv '["eosio.msig", 1]' -p eosio
 }
 
 # Create eoslocal priveledged account
@@ -126,6 +126,7 @@ function create_eoslocal_account () {
 
 # Create testing user accounts, use these key configure scatter, lynx and other wallets
 function create_testing_accounts () {
+  unlock_wallet
   echo "Creating testing accounts"
 
   USER_A_ACCOUNT="eoslocalusra"
@@ -185,10 +186,10 @@ done
 
 create_wallet
 create_eosio_accounts
-deploy_system_contracts
-create_eoslocal_account
-create_testing_accounts
-build_and_deploy_contracts
+# deploy_system_contracts
+# create_eoslocal_account
+# create_testing_accounts
+# build_and_deploy_contracts
 
 # debugging code
 echo 'Wallet info:'
